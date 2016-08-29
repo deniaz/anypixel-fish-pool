@@ -1,4 +1,6 @@
-const colors = ['#0099CC', '#BADA55', '#AA0000'];
+var PF = require('pathfinding');
+
+const colors = ['#2ecc71', '#27ae60', '#3498db', '#2980b9', '#1abc9c', '#16a085', '#e67e22', '#e74c3c'];
 
 const DIRECTION = {
   UP: -1,
@@ -6,12 +8,16 @@ const DIRECTION = {
 }
 
 export default class Fish {
-  constructor(ctx) {
+  constructor(ctx, dimensions) {
     this.ctx = ctx;
+
+    this.grid = new PF.Grid(dimensions.width, dimensions.height);
+    this.finder = new PF.AStarFinder({
+      heuristic: PF.Heuristic.euclidean
+    });
 
     this.id = Math.floor(Math.random() * 256) + 1;
 
-    this.active = true;
     this.age = Math.floor(Math.random() * 128);
     this.color = colors[Math.floor(Math.random() * colors.length)];
 
@@ -29,16 +35,11 @@ export default class Fish {
       x: 2,
       y: 1
     };
-  }
 
-  isActive() {
-    return this.active;
-  }
+    this.hungry = false;
+    this.path = [];
 
-  isInBounds() {
-    const { x, y } = this.coords;
-    const { width, height } = this.ctx.canvas;
-    return x >= 0 && x <= (width - this.width) && y >= 0 && y <= (height - this.height);
+    this.step = 0;
   }
 
   hitsVerticalBorder() {
@@ -54,11 +55,25 @@ export default class Fish {
   }
 
   draw() {
-    this.ctx.fillStyle = this.color;
+    //this.ctx.fillStyle = this.color;
+    this.ctx.fillStyle = this.hungry ? '#e74c3c' : '#3498db';
     this.ctx.fillRect(this.coords.x, this.coords.y, this.width, this.height);
   }
 
-  update() {
+  notify(coords) {
+    this.hungry = true;
+    console.log(`Hungry! ${this.hungry}`);
+    const x = parseInt(this.coords.x, 10);
+    const y = parseInt(this.coords.y, 10);
+    const grid = this.grid.clone();
+    this.path = this.finder.findPath(x, y, coords.x, coords.y, grid);
+
+    if (this.step++ > 0 && this.path.length === 0) {
+      console.warn(x, y, coords);
+    }
+  }
+
+  stroll() {
     this.coords.x = this.coords.x + this.velocity.x;
     this.age++;
 
@@ -73,19 +88,34 @@ export default class Fish {
 
       if (this.coords.y > 1 && this.velocity.y < 0) {
         this.velocity.y = this.velocity.y * (-1);
-        console.info(this.coords.y, this.velocity.y);
       }
     } else {
       this.coords.y = this.coords.y + this.velocity.y;
     }
-    // if (!this.isInBounds()) {
-    //   console.info('Not in bound');
-    //
-    //
-    //   // this.coords.x = this.coords.x + this.velocity.x*3;
-    //   // this.coords.y = this.coords.y + this.velocity.y*3;
-    // }
+  }
 
-    // this.active = this.active && this.isInBounds();
+  navigateToFood() {
+    const x = parseInt(this.coords.x, 10);
+    const y = parseInt(this.coords.y, 10);
+
+    const nextStep = this.path.shift();
+
+    if (!nextStep) {
+      this.path = [];
+      this.hungry = false;
+      console.info('Eaten.');
+      return;
+    }
+
+    this.coords.x = nextStep[0];
+    this.coords.y = nextStep[1];
+  }
+
+  update() {
+    if (!this.hungry) {
+      this.stroll();
+    } else {
+      this.navigateToFood();
+    }
   }
 }
