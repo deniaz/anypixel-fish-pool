@@ -1,0 +1,21 @@
+{
+  "name": "namics-anypixel",
+  "version": "1.0.0",
+  "description": "What",
+  "main": "index.js",
+  "dependencies": {
+    "anypixel": "^1.0.2",
+    "phaser": "^2.6.2"
+  },
+  "devDependencies": {
+    "babel-preset-es2015": "^6.14.0",
+    "babelify": "^7.3.0",
+    "watchify": "^3.7.0"
+  },
+  "scripts": {
+    "build": "browserify -t babelify -d src/app.js > index.js",
+    "watch": "watchify -t babelify src/app.js -o index.js"
+  },
+  "author": "Robert Vogt",
+  "license": "MIT"
+}
