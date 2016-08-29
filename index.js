@@ -196,7 +196,12 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var colors = ['#AA00CC', '#bada55', '#0099CC'];
+var colors = ['#0099CC', '#BADA55', '#AA0000'];
+
+var DIRECTION = {
+  UP: -1,
+  DOWN: 1
+};
 
 var Fish = function () {
   function Fish(ctx) {
@@ -204,22 +209,26 @@ var Fish = function () {
 
     this.ctx = ctx;
 
+    this.id = Math.floor(Math.random() * 256) + 1;
+
     this.active = true;
     this.age = Math.floor(Math.random() * 128);
     this.color = colors[Math.floor(Math.random() * colors.length)];
 
+    this.width = 4;
+    this.height = 2;
+
+    this.direction = Math.random() < 0.5 ? DIRECTION.UP : DIRECTION.DOWN;
+
     this.coords = {
-      x: 0,
-      y: 0
+      x: Math.floor(Math.random() * (ctx.canvas.width - this.width)),
+      y: Math.floor(Math.random() * (ctx.canvas.height - this.height))
     };
 
     this.velocity = {
-      x: 3,
-      y: 0
+      x: 2,
+      y: 1
     };
-
-    this.width = 8;
-    this.height = 4;
   }
 
   _createClass(Fish, [{
@@ -237,32 +246,67 @@ var Fish = function () {
       var width = _ctx$canvas.width;
       var height = _ctx$canvas.height;
 
-      return x >= 0 && x <= width && y >= 0 && y <= height;
+      return x >= 0 && x <= width - this.width && y >= 0 && y <= height - this.height;
+    }
+  }, {
+    key: 'hitsVerticalBorder',
+    value: function hitsVerticalBorder() {
+      var _coords2 = this.coords;
+      var x = _coords2.x;
+      var y = _coords2.y;
+      var _ctx$canvas2 = this.ctx.canvas;
+      var width = _ctx$canvas2.width;
+      var height = _ctx$canvas2.height;
+
+      return x <= 0 || x >= width - this.width;
+    }
+  }, {
+    key: 'hitsHorizontalBorder',
+    value: function hitsHorizontalBorder() {
+      var _coords3 = this.coords;
+      var x = _coords3.x;
+      var y = _coords3.y;
+      var _ctx$canvas3 = this.ctx.canvas;
+      var width = _ctx$canvas3.width;
+      var height = _ctx$canvas3.height;
+
+      return y <= 0 || y >= height - this.height;
     }
   }, {
     key: 'draw',
     value: function draw() {
-      console.debug('Drawing Fish');
       this.ctx.fillStyle = this.color;
       this.ctx.fillRect(this.coords.x, this.coords.y, this.width, this.height);
     }
   }, {
     key: 'update',
     value: function update() {
-      console.debug('Updating Fish');
       this.coords.x = this.coords.x + this.velocity.x;
-      this.coords.y = this.coords.y + this.velocity.y;
-
-      this.velocity.y = 3 * Math.sin(this.age * Math.PI / 64);
-
       this.age++;
-      if (!this.isInBounds()) {
-        this.velocity.x = this.velocity.x * -1;
-        this.velocity.y = this.velocity.y * -1;
 
-        this.coords.x = this.coords.x + this.velocity.x * 3;
-        this.coords.y = this.coords.y + this.velocity.y * 3;
+      if (this.hitsVerticalBorder()) {
+        this.velocity.x = this.velocity.x * -1;
       }
+
+      this.velocity.y = 0.25 * Math.sin(this.age * Math.PI / 64);
+
+      if (this.hitsHorizontalBorder()) {
+        this.coords.y = this.coords.y < 1 ? this.height : this.ctx.canvas.height - this.height * 2;
+
+        if (this.coords.y > 1 && this.velocity.y < 0) {
+          this.velocity.y = this.velocity.y * -1;
+          console.info(this.coords.y, this.velocity.y);
+        }
+      } else {
+        this.coords.y = this.coords.y + this.velocity.y;
+      }
+      // if (!this.isInBounds()) {
+      //   console.info('Not in bound');
+      //
+      //
+      //   // this.coords.x = this.coords.x + this.velocity.x*3;
+      //   // this.coords.y = this.coords.y + this.velocity.y*3;
+      // }
 
       // this.active = this.active && this.isInBounds();
     }
@@ -290,7 +334,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var FPS = 5;
+var FPS = 15;
+var MAX_FISHES = 25;
 var FONT_STYLE = '18px Arial';
 
 var Game = function () {
@@ -302,7 +347,7 @@ var Game = function () {
 
     this.fishes = [];
 
-    for (var i = 0; i < 3; i++) {
+    for (var i = 0; i < MAX_FISHES; i++) {
       this.fishes.push(new _fish2.default(this.ctx));
     }
 
@@ -334,7 +379,7 @@ var Game = function () {
         return fish.isActive();
       });
 
-      if (this.fishes.length < 3) {
+      if (this.fishes.length < MAX_FISHES) {
         this.fishes.push(new _fish2.default(this.ctx));
       }
 

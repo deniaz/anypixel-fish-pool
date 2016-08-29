@@ -1,6 +1,7 @@
 import Fish from './fish';
 
-const FPS = 5;
+const FPS = 15;
+const MAX_FISHES = 25;
 const FONT_STYLE = '18px Arial';
 
 export default class Game {
@@ -10,7 +11,7 @@ export default class Game {
 
     this.fishes = [];
 
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < MAX_FISHES; i++) {
       this.fishes.push(new Fish(this.ctx));
     }
 
@@ -30,7 +31,7 @@ export default class Game {
     this.fishes.forEach(fish => fish.update());
     this.fishes = this.fishes.filter(fish => fish.isActive());
 
-    if (this.fishes.length < 3) {
+    if (this.fishes.length < MAX_FISHES) {
       this.fishes.push(new Fish(this.ctx));
     }
 
