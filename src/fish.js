@@ -12,9 +12,7 @@ export default class Fish {
     this.ctx = ctx;
 
     this.grid = new PF.Grid(dimensions.width, dimensions.height);
-    this.finder = new PF.AStarFinder({
-      heuristic: PF.Heuristic.euclidean
-    });
+    this.finder = new PF.AStarFinder();
 
     this.id = Math.floor(Math.random() * 256) + 1;
 
@@ -39,6 +37,7 @@ export default class Fish {
     this.hungry = false;
     this.path = [];
 
+    this.food = null;
     this.step = 0;
   }
 
@@ -60,8 +59,10 @@ export default class Fish {
     this.ctx.fillRect(this.coords.x, this.coords.y, this.width, this.height);
   }
 
-  notify(coords) {
+  foodCreated(food) {
     this.hungry = true;
+    this.food = food;
+    const { coords } = food;
     console.log(`Hungry! ${this.hungry}`);
     const x = parseInt(this.coords.x, 10);
     const y = parseInt(this.coords.y, 10);
@@ -70,6 +71,15 @@ export default class Fish {
 
     if (this.step++ > 0 && this.path.length === 0) {
       console.warn(x, y, coords);
+    }
+  }
+
+  foodDestroyed(food) {
+    console.info('Food eaten, losing interest');
+    if (this.food === food) {
+      this.path = [];
+      this.hungry = false;
+      this.velocity.y = Math.random() * Math.sin(this.age * Math.PI / 64);
     }
   }
 

@@ -48,7 +48,7 @@ export default class Game {
     this.foods.push(food);
 
     this.fishes.forEach(fish => {
-      fish.notify(food.coords);
+      fish.foodCreated(food);
     });
   }
 
@@ -60,11 +60,12 @@ export default class Game {
   checkForFood() {
     this.fishes.forEach(fish => {
       this.foods.forEach(food => {
-        if(food.coords.x < Math.floor(fish.coords.x) + fish.width &&
+        if (food.coords.x < Math.floor(fish.coords.x) + fish.width &&
             food.coords.x + food.width > Math.floor(fish.coords.x) &&
             food.coords.y < Math.floor(fish.coords.y) + fish.height &&
             food.coords.y + food.height > Math.floor(fish.coords.y)) {
-          food.active = false
+          food.active = false;
+          this.fishes.forEach(f2 => f2.foodDestroyed(food));
         }
       });
     });
