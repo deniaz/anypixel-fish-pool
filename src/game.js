@@ -34,11 +34,13 @@ export default class Game {
     this.ctx.clearRect(0, 0, width, height);
 
     this.fishes.forEach(fish => {
-      fish.update();
-      fish.draw();
+        fish.update();
+        fish.draw();
     });
 
     this.foods.forEach(food => this.drawFood(food));
+
+    this.checkForFood();
   }
 
   setFood(ev) {
@@ -53,5 +55,22 @@ export default class Game {
   drawFood(food) {
     this.ctx.fillStyle = "#8e44ad";
     this.ctx.fillRect(food.coords.x, food.coords.y, 2, 2);
+  }
+
+  checkForFood() {
+    this.fishes.forEach(fish => {
+      this.foods.forEach(food => {
+        if(food.coords.x < Math.floor(fish.coords.x) + fish.width &&
+            food.coords.x + food.width > Math.floor(fish.coords.x) &&
+            food.coords.y < Math.floor(fish.coords.y) + fish.height &&
+            food.coords.y + food.height > Math.floor(fish.coords.y)) {
+          food.active = false
+        }
+      });
+    });
+
+    this.foods = this.foods.filter((item)=> {
+      return item.active;
+    });
   }
 }
