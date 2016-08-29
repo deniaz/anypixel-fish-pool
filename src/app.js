@@ -4,5 +4,7 @@ import Game from './game';
 
 const game = new Game(ctx);
 
-document.addEventListener('onButtonDown', (ev) => {});
+document.addEventListener('onButtonDown', (ev) => {
+	game.setFood(ev)
+});
 document.addEventListener('onButtonUp', (ev) => {});

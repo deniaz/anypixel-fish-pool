@@ -1,4 +1,5 @@
 import Fish from './fish';
+import Food from './food';
 
 const FPS = 15;
 const MAX_FISHES = 25;
@@ -10,6 +11,7 @@ export default class Game {
     this.ctx.font = FONT_STYLE;
 
     this.fishes = [];
+    this.foods = [];
 
     for (let i = 0; i < MAX_FISHES; i++) {
       this.fishes.push(new Fish(this.ctx));
@@ -36,5 +38,16 @@ export default class Game {
     }
 
     this.fishes.forEach(fish => fish.draw());
+
+    this.foods.forEach(food => this.drawFood(food));
+  }
+
+  setFood(ev) {
+    this.foods.push(new Food(ev));
+  }
+
+  drawFood(food) {
+    this.ctx.fillStyle = "#f00";
+    this.ctx.fillRect(food.coords.x, food.coords.y, 2, 2);
   }
 }
